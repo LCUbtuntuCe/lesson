@@ -28,10 +28,14 @@ int main()
 	fd_set write_fd,read_fd;
 	struct timeval net_timer;
         
-        
 	mkfifo("./fifo1",S_IWUSR|S_IRUSR|S_IRGRP|S_IROTH);
 	mkfifo("./fifo2",S_IWUSR|S_IRUSR|S_IRGRP|S_IROTH);
-
+        
+	if(wfd=open("./fifo2",O_WRONLY|O_NONBLOCK)==ENXIO)
+        {
+	   rfd=open("./fifo1",O_RDONLY);
+	   wfd=open("./fifo2",O_WRONLY);
+	}
 	rfd=open("./fifo1",O_RDONLY);
 	wfd=open("./fifo2",O_WRONLY);
 
