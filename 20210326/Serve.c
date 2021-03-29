@@ -59,7 +59,7 @@ int main()
 				 
                 FD_SET(sockfd,&wfd_set);
 
-                timeout.tv_sec=10;
+                timeout.tv_sec=5;
                 timeout.tv_usec=0;
 
                 ret=select(0, NULL,&wfd_set, NULL, &timeout);
@@ -71,12 +71,15 @@ int main()
 
                 if(p!=0)
                 {
-                        send_str[strlen(send_str)-1]='\0';
+                        //send_str[strlen(send_str)-1]='\0';
                         if(strstr(send_str,"quit")!=NULL)
                         {
+				sendto(sockfd,"I stop work",strlen("I stop work"),0,(struct sockaddr*)&remote_addr,sizeof(remote_addr));
+				sleep(2);
                                 close(sockfd);
                                 exit(0);
-                        } 
+                        }
+			//send_str[strlen(send_str)-1]='\0';
                         sendto(sockfd,send_str,strlen(send_str),0,(struct sockaddr*)&remote_addr,sizeof(remote_addr));
 			memset(send_str,'\0',strlen(send_str));
 			p=0;
@@ -96,8 +99,9 @@ int main()
 			      exit(1);
 			   }
 		   }
-                   buf1[recvbytes]='\0';
+                   //buf1[recvbytes]='\0';
                    printf("\n%s:%s\n",buf2,buf1);
+		   memset(buf1,'\0',MAXDATASIZE);
                    printf("\nServer:\n");
 		   scanf("%s",send_str);
 		   p=1;

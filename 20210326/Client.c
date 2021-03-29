@@ -11,7 +11,7 @@
 #include<sys/time.h>
 #include<fcntl.h>
 
-#define MAXDATASIZE 256
+#define MAXDATASIZE 2048
 #define SERVPORT 4444
 #define STDIN 0
 
@@ -20,7 +20,6 @@ int main()
         int sockfd;
         int recvbytes;
         char buf[MAXDATASIZE];
-        char *str;
         char name[MAXDATASIZE];
         char send_str[MAXDATASIZE];
         struct sockaddr_in serv_addr;
@@ -41,14 +40,12 @@ int main()
         printf("\nthe first thing is input your name:\n");
         scanf("%s",name);
         name[strlen(name)]='\0';
-        printf("\n%s: \n",name);
         fflush(stdout);
 
         sendto(sockfd,name,strlen(name),0,(struct sockaddr*)&serv_addr,sizeof(serv_addr));
 
-        sendto(sockfd,"I want to connect",strlen("I want to connect"),0,(struct sockaddr*)&serv_addr,sizeof(serv_addr));
+        sendto(sockfd,"I am LiuChang,I want to connect",strlen("I am LiuChang,I want to connect"),0,(struct sockaddr*)&serv_addr,sizeof(serv_addr));
         
-	int p=0;
         while(1)
 	{
                 FD_ZERO(&rfd_set);
@@ -58,7 +55,7 @@ int main()
                 FD_SET(STDIN,&wfd_set);
                 FD_SET(sockfd,&wfd_set);
 
-                timeout.tv_sec=10;
+                timeout.tv_sec=5;
                 timeout.tv_usec=0;
 
                 ret=select(0,NULL,NULL,NULL,&timeout);
@@ -68,18 +65,18 @@ int main()
                     perror("\nselect error!\n");
                     exit(-1);
                 }
-
-                if(p!=0)
+                if(FD_ISSET(STDIN,&wfd_set))
                 {
-                    send_str[strlen(send_str)-1]='\0';
+                    //send_str[strlen(send_str)-1]='\0';
                     if(strstr(send_str,"quit")!=NULL)
                     {
+			    sendto(sockfd,"I stop work",strlen("I stop work"),0,(struct sockaddr*)&serv_addr,sizeof(serv_addr));
                             close(sockfd);
                             exit(0);
                     }
+		    //send_str[strlen(send_str)-1]='\0';
                     sendto(sockfd,send_str,strlen(send_str),0,(struct sockaddr*)&serv_addr,sizeof(serv_addr));
-		    p=0;
-		    memset(send_str,'\0',sizeof(send_str));
+		    memset(send_str,'\0',MAXDATASIZE);
                 }
                 if(FD_ISSET(sockfd,&wfd_set))
                 {
@@ -92,14 +89,10 @@ int main()
 		      exit(1);
 		   }
 
-		   if(recvbytes>0)
-		   {
-			   printf("\nServer:  %s\n",buf);
-			   memset(buf,'\0',sizeof(buf));
-		   }
+	           printf("\nServer:  %s\n",buf);
+		   memset(buf,'\0',MAXDATASIZE);
 		   printf("\n%s: ",name);
 		   scanf("%s",send_str);
-		   p=1;
                 }
 	}
 }
