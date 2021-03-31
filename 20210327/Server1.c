@@ -65,13 +65,26 @@ void Server_func(int i)
     }
 }
 
+void Connect()
+{
+	int sin_size;
+	sin_size=sizeof(struct sockaddr_in);
+	if((client_fd=accept(sockfd,(struct sockaddr*)&remote_addr,&sin_size))==-1)
+        {
+	   perror("\naccept error!\n");
+	   exit(1);
+	}
+	//printf("\nSuccessfully connected!\n");
+	fcntl(client_fd,F_SETFD,O_NONBLOCK);
+}
+
 int main()
 {
     Sem_prepare();
     sem_init(&send_inform,0,1);
     for(int i=0;i<MaxNumberP;i++)client_ph[i]=NULL;
 
-    int sin_size;
+    //int sin_size;
     char buff[MAXSIZE];
     int recvbytes;
     
@@ -99,18 +112,19 @@ int main()
 	    perror("\nlisten error\n");
 	    exit(1);
     }
-    sin_size=sizeof(struct sockaddr_in);
-    if((client_fd=accept(sockfd,(struct sockaddr*)&remote_addr,&sin_size))==-1)
+    //sin_size=sizeof(struct sockaddr_in);
+    /*if((client_fd=accept(sockfd,(struct sockaddr*)&remote_addr,&sin_size))==-1)
     {
 	    perror("\naccept error!\n");
 	    exit(1);
     }
     printf("\nSuccessfully connected!\n");
 
-    fcntl(client_fd,F_SETFD,O_NONBLOCK);
+    fcntl(client_fd,F_SETFD,O_NONBLOCK);*/
     
     while(1)
     {
+	    Connect();
 	    FD_ZERO(&rfd_set);
             FD_ZERO(&wfd_set);
 	    FD_ZERO(&efd_set);
